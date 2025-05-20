@@ -21,42 +21,40 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { VisitorForm } from '@/components/visitor/visitor-form'
+import { type Visitor, type VisitorFormData } from './visitor-schema'
 
-type Visitor = {
-  id: string
-  nome: string
-  observacao: string
-  dataHora: Date
-}
+const INITIAL_VISITORS: Visitor[] = [
+  {
+    id: '1',
+    nome: 'Maria Silva',
+    observacao: 'Primeira vez na igreja',
+    dataHora: new Date(2023, 4, 15, 9, 30),
+  },
+  {
+    id: '2',
+    nome: 'João Oliveira',
+    observacao: '',
+    dataHora: new Date(2023, 4, 15, 10, 15),
+  },
+]
 
 export function VisitorsTab() {
-  const [visitors, setVisitors] = useState<Visitor[]>([
-    {
-      id: '1',
-      nome: 'Maria Silva',
-      observacao: 'Primeira vez na igreja',
-      dataHora: new Date(2023, 4, 15, 9, 30),
-    },
-    {
-      id: '2',
-      nome: 'João Oliveira',
-      observacao: '',
-      dataHora: new Date(2023, 4, 15, 10, 15),
-    },
-  ])
+  const [visitors, setVisitors] = useState<Visitor[]>(INITIAL_VISITORS)
   const [dialogOpen, setDialogOpen] = useState(false)
 
-  const handleAddVisitante = (
-    novoVisitante: Omit<Visitor, 'id' | 'dataHora'>
-  ) => {
-    const visitorCompleto: Visitor = {
-      ...novoVisitante,
+  const handleAddVisitante = (formData: VisitorFormData) => {
+    const novoVisitante: Visitor = {
+      ...formData,
       id: Date.now().toString(),
       dataHora: new Date(),
     }
 
-    setVisitors([visitorCompleto, ...visitors])
+    setVisitors((prevVisitors) => [novoVisitante, ...prevVisitors])
     setDialogOpen(false)
+  }
+
+  const formatarDataHora = (data: Date) => {
+    return format(data, "dd 'de' MMMM 'de' yyyy 'às' HH:mm", { locale: ptBR })
   }
 
   return (
@@ -66,7 +64,6 @@ export function VisitorsTab() {
           Gerenciamento de Visitantes
         </h2>
 
-        {/* Botão para abrir o dialog em dispositivos móveis */}
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button className="md:hidden" size="sm">
@@ -84,7 +81,6 @@ export function VisitorsTab() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
-        {/* Formulário visível apenas em desktop */}
         <Card className="hidden md:block">
           <CardHeader>
             <CardTitle>Registrar Visitantes</CardTitle>
@@ -97,7 +93,6 @@ export function VisitorsTab() {
           </CardContent>
         </Card>
 
-        {/* Lista de visitantes (ocupa toda a largura em mobile) */}
         <Card className="md:col-span-1 col-span-2">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <div>
@@ -130,11 +125,7 @@ export function VisitorsTab() {
                             </p>
                           )}
                           <p className="text-gray-400 text-xs mt-2">
-                            {format(
-                              visitor.dataHora,
-                              "dd 'de' MMMM 'de' yyyy 'às' HH:mm",
-                              { locale: ptBR }
-                            )}
+                            {formatarDataHora(visitor.dataHora)}
                           </p>
                         </div>
                       </div>

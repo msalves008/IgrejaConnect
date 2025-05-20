@@ -1,5 +1,4 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Button } from '@/components/ui/button'
 import { VisitorsTab } from '@/components/visitor/visitor-tab'
 import { NoticeTab } from '@/components/notice/notice-tab'
 
@@ -14,9 +13,6 @@ export default function Home() {
               Sistema de gerenciamento para igrejas
             </p>
           </div>
-          <Button variant="ghost" size="sm" className="md:hidden">
-            Menu
-          </Button>
         </div>
       </header>
 

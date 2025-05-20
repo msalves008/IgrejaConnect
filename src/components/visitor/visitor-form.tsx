@@ -1,62 +1,79 @@
 'use client'
 
-import type React from 'react'
-
-import { useState } from 'react'
 import { Plus } from 'lucide-react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { Label } from '@/components/ui/label'
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form'
+import { visitorFormSchema, type VisitorFormData } from './visitor-schema'
 
 type VisitorFormProps = {
-  onSubmit: (data: { nome: string; observacao: string }) => void
+  onSubmit: (data: VisitorFormData) => void
 }
 
 export function VisitorForm({ onSubmit }: VisitorFormProps) {
-  const [nome, setNome] = useState('')
-  const [observacao, setObservacao] = useState('')
+  const form = useForm<VisitorFormData>({
+    resolver: zodResolver(visitorFormSchema),
+    defaultValues: {
+      nome: '',
+      observacao: '',
+    },
+  })
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (!nome.trim()) return
-
-    onSubmit({
-      nome,
-      observacao,
-    })
-
-    setNome('')
-    setObservacao('')
+  const handleSubmit = (data: VisitorFormData) => {
+    onSubmit(data)
+    form.reset()
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="nome">Nome completo</Label>
-        <Input
-          id="nome"
-          placeholder="Digite o nome completo"
-          value={nome}
-          onChange={(e) => setNome(e.target.value)}
-          required
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="nome"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nome completo</FormLabel>
+              <FormControl>
+                <Input placeholder="Digite o nome completo" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="observacao">Observações (opcional)</Label>
-        <Textarea
-          id="observacao"
-          placeholder="Adicione observações relevantes"
-          value={observacao}
-          onChange={(e) => setObservacao(e.target.value)}
-          className="min-h-[100px]"
+
+        <FormField
+          control={form.control}
+          name="observacao"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Observações (opcional)</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Adicione observações relevantes"
+                  className="min-h-[100px]"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </div>
-      <Button type="submit" className="w-full">
-        <Plus className="mr-2 h-4 w-4" />
-        Registrar Visitante
-      </Button>
-    </form>
+
+        <Button type="submit" className="w-full">
+          <Plus className="mr-2 h-4 w-4" />
+          Registrar Visitante
+        </Button>
+      </form>
+    </Form>
   )
 }

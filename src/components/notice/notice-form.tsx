@@ -1,13 +1,11 @@
 'use client'
 
-import type React from 'react'
-
-import { useState } from 'react'
 import { Plus, Calendar } from 'lucide-react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { Label } from '@/components/ui/label'
 import {
   Popover,
   PopoverContent,
@@ -17,114 +15,115 @@ import { Calendar as CalendarComponent } from '@/components/ui/calendar'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { cn } from '@/lib/utils'
-// import { TimePicker } from "@/components/ui/time-picker"
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form'
+import { noticeFormSchema, type NoticeFormData } from './notice-schema'
 
 type NoticeFormProps = {
-  onSubmit: (data: {
-    titulo: string
-    descricao: string
-    dataHoraEvento: Date | null
-  }) => void
+  onSubmit: (data: NoticeFormData) => void
 }
 
 export function NoticeForm({ onSubmit }: NoticeFormProps) {
-  const [titulo, setTitulo] = useState('')
-  const [descricao, setDescricao] = useState('')
-  const [date, setDate] = useState<Date | undefined>(undefined)
-  const [time, setTime] = useState<string | undefined>(undefined)
+  const form = useForm<NoticeFormData>({
+    resolver: zodResolver(noticeFormSchema),
+    defaultValues: {
+      titulo: '',
+      descricao: '',
+      dataHoraEvento: null,
+    },
+  })
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (!titulo.trim() || !descricao.trim()) return
-
-    let dataHoraEvento: Date | null = null
-
-    if (date) {
-      dataHoraEvento = new Date(date)
-
-      if (time) {
-        const [hours, minutes] = time.split(':').map(Number)
-        dataHoraEvento.setHours(hours || 0, minutes || 0)
-      }
-    }
-
-    onSubmit({
-      titulo,
-      descricao,
-      dataHoraEvento,
-    })
-
-    setTitulo('')
-    setDescricao('')
-    setDate(undefined)
-    setTime(undefined)
+  const handleSubmit = (data: NoticeFormData) => {
+    onSubmit(data)
+    form.reset()
   }
 
-  // const handleTimeChange = (value: string) => {
-  //   setTime(value)
-  // }
-
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="titulo">Título do aviso</Label>
-        <Input
-          id="titulo"
-          placeholder="Digite o título do aviso"
-          value={titulo}
-          onChange={(e) => setTitulo(e.target.value)}
-          required
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="titulo"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Título do aviso</FormLabel>
+              <FormControl>
+                <Input placeholder="Digite o título do aviso" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="descricao">Descrição do aviso</Label>
-        <Textarea
-          id="descricao"
-          placeholder="Descreva os detalhes do aviso"
-          value={descricao}
-          onChange={(e) => setDescricao(e.target.value)}
-          className="min-h-[120px]"
-          required
+
+        <FormField
+          control={form.control}
+          name="descricao"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Descrição do aviso</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Descreva os detalhes do aviso"
+                  className="min-h-[120px]"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </div>
-      <div className="space-y-2">
-        <Label>Data do evento</Label>
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              variant={'outline'}
-              className={cn(
-                'w-full justify-start text-left font-normal',
-                !date && 'text-muted-foreground'
-              )}
-            >
-              <Calendar className="mr-2 h-4 w-4" />
-              {date ? (
-                format(date, 'PPP', { locale: ptBR })
-              ) : (
-                <span>Selecione uma data</span>
-              )}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
-            <CalendarComponent
-              mode="single"
-              selected={date}
-              onSelect={setDate}
-              initialFocus
-              locale={ptBR}
-            />
-          </PopoverContent>
-        </Popover>
-      </div>
-      <div className="space-y-2">
-        {/* <TimePicker value={time} onChange={handleTimeChange} disabled={!date} /> */}
-      </div>
-      <Button type="submit" className="w-full">
-        <Plus className="mr-2 h-4 w-4" />
-        Adicionar Aviso
-      </Button>
-    </form>
+
+        <FormField
+          control={form.control}
+          name="dataHoraEvento"
+          render={({ field }) => (
+            <FormItem className="flex flex-col">
+              <FormLabel>Data do evento</FormLabel>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant={'outline'}
+                      className={cn(
+                        'w-full justify-start text-left font-normal',
+                        !field.value && 'text-muted-foreground'
+                      )}
+                    >
+                      <Calendar className="mr-2 h-4 w-4" />
+                      {field.value ? (
+                        format(field.value, 'PPP', { locale: ptBR })
+                      ) : (
+                        <span>Selecione uma data</span>
+                      )}
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <CalendarComponent
+                    mode="single"
+                    selected={field.value || undefined}
+                    onSelect={field.onChange}
+                    initialFocus
+                    locale={ptBR}
+                  />
+                </PopoverContent>
+              </Popover>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <Button type="submit" className="w-full">
+          <Plus className="mr-2 h-4 w-4" />
+          Adicionar Aviso
+        </Button>
+      </form>
+    </Form>
   )
 }
