@@ -38,7 +38,11 @@ const INITIAL_VISITORS: Visitor[] = [
   },
 ]
 
-export function VisitorsTab() {
+export function VisitorsTab({
+  isProjectionScreen,
+}: {
+  isProjectionScreen?: boolean
+}) {
   const [visitors, setVisitors] = useState<Visitor[]>(INITIAL_VISITORS)
   const [dialogOpen, setDialogOpen] = useState(false)
 
@@ -64,20 +68,22 @@ export function VisitorsTab() {
           Gerenciamento de Visitantes
         </h2>
 
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="md:hidden" size="sm">
-              <Plus className="mr-2 h-4 w-4" />
-              Novo Visitante
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Registrar Visitante</DialogTitle>
-            </DialogHeader>
-            <VisitorForm onSubmit={handleAddVisitante} />
-          </DialogContent>
-        </Dialog>
+        {!isProjectionScreen && (
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="md:hidden" size="sm">
+                <Plus className="mr-2 h-4 w-4" />
+                Novo Visitante
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Registrar Visitante</DialogTitle>
+              </DialogHeader>
+              <VisitorForm onSubmit={handleAddVisitante} />
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
@@ -103,7 +109,11 @@ export function VisitorsTab() {
             </div>
           </CardHeader>
           <CardContent>
-            <ScrollArea className="h-[400px] pr-4">
+            <ScrollArea
+              className={`${
+                !isProjectionScreen ? 'h-[400px]' : ' h-auto'
+              } pr-4`}
+            >
               {visitors.length > 0 ? (
                 <div className="space-y-4">
                   {visitors.map((visitor) => (

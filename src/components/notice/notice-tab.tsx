@@ -27,12 +27,16 @@ import { NoticeForm } from './notice-form'
 type Notice = {
   id: string
   titulo: string
-  descricao: string
-  dataPublicacao: Date
+  descricao: string | undefined
+  dataPublicacao: Date | undefined
   dataHoraEvento: Date | null
 }
 
-export function NoticeTab() {
+export function NoticeTab({
+  isProjectionScreen,
+}: {
+  isProjectionScreen: boolean
+}) {
   const [avisos, setAvisos] = useState<Notice[]>([
     {
       id: '1',
@@ -72,35 +76,53 @@ export function NoticeTab() {
         </h2>
 
         {/* Botão para abrir o dialog em dispositivos móveis */}
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="md:hidden" size="sm">
-              <Plus className="mr-2 h-4 w-4" />
-              Novo Aviso
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Adicionar Aviso</DialogTitle>
-            </DialogHeader>
-            <NoticeForm onSubmit={handleAddAviso} />
-          </DialogContent>
-        </Dialog>
+        {!isProjectionScreen && (
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="md:hidden" size="sm">
+                <Plus className="mr-2 h-4 w-4" />
+                Novo Aviso
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Adicionar Aviso</DialogTitle>
+              </DialogHeader>
+              <NoticeForm
+                onSubmit={(data) =>
+                  handleAddAviso({
+                    ...data,
+                    descricao: data.descricao || '',
+                  })
+                }
+              />
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
         {/* Formulário visível apenas em desktop */}
-        <Card className="hidden md:block">
-          <CardHeader>
-            <CardTitle>Avisos da Semana</CardTitle>
-            <CardDescription>
-              Adicione avisos importantes para a comunidade
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <NoticeForm onSubmit={handleAddAviso} />
-          </CardContent>
-        </Card>
+        {!isProjectionScreen && (
+          <Card className="hidden md:block">
+            <CardHeader>
+              <CardTitle>Avisos da Semana</CardTitle>
+              <CardDescription>
+                Adicione avisos importantes para a comunidade
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <NoticeForm
+                onSubmit={(data) =>
+                  handleAddAviso({
+                    ...data,
+                    descricao: data.descricao || '',
+                  })
+                }
+              />
+            </CardContent>
+          </Card>
+        )}
 
         {/* Lista de avisos (ocupa toda a largura em mobile) */}
         <Card className="md:col-span-1 col-span-2">
@@ -113,7 +135,11 @@ export function NoticeTab() {
             </div>
           </CardHeader>
           <CardContent>
-            <ScrollArea className="h-[400px] pr-4">
+            <ScrollArea
+              className={`${
+                !isProjectionScreen ? 'h-[400px]' : ' h-auto'
+              } pr-4`}
+            >
               {avisos.length > 0 ? (
                 <div className="space-y-4">
                   {avisos.map((aviso) => (
@@ -152,7 +178,7 @@ export function NoticeTab() {
                           <p className="text-gray-400 text-xs mt-2">
                             Publicado em{' '}
                             {format(
-                              aviso.dataPublicacao,
+                              aviso.dataPublicacao || new Date(),
                               "dd 'de' MMMM 'de' yyyy",
                               { locale: ptBR }
                             )}
