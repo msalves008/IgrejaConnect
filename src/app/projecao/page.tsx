@@ -1,8 +1,16 @@
+'use client'
+
+import { useQueryState } from 'nuqs'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { VisitorsTab } from '@/components/visitor/visitor-tab'
 import { NoticeTab } from '@/components/notice/notice-tab'
 
-export default function Home() {
+export default function ProjectionScreen() {
+  const [activeTab, setActiveTab] = useQueryState('tab', {
+    defaultValue: 'visitantes',
+    parse: (value) => (value === 'avisos' ? 'avisos' : 'visitantes'),
+  })
+
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white border-b border-gray-200 shadow-sm">
@@ -17,7 +25,11 @@ export default function Home() {
       </header>
 
       <main className="container mx-auto px-4 py-6">
-        <Tabs defaultValue="visitantes" className="w-full">
+        <Tabs
+          value={activeTab}
+          onValueChange={(value) => setActiveTab(value)}
+          className="w-full"
+        >
           <TabsList className="grid w-full grid-cols-2 mb-6">
             <TabsTrigger value="visitantes">Visitantes</TabsTrigger>
             <TabsTrigger value="avisos">Avisos</TabsTrigger>
