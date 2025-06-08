@@ -35,7 +35,7 @@ type Notice = {
 export function NoticeTab({
   isProjectionScreen,
 }: {
-  isProjectionScreen: boolean
+  isProjectionScreen?: boolean
 }) {
   const [avisos, setAvisos] = useState<Notice[]>([
     {
